@@ -79,20 +79,19 @@ class SelfAttention(nn.Module):
         # (max_len, 1)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(-1)
         # (output_dim//2)
-        ids = torch.arange(0, output_dim // 2, dtype=torch.float)  # 即公式里的i, i的范围是 [0,d/2]
+        ids = torch.arange(0, output_dim // 2, dtype=torch.float)  
         theta = torch.pow(10000, -2 * ids / output_dim)
 
         # (max_len, output_dim//2)
-        embeddings = position * theta  # 即公式里的：pos / (10000^(2i/d))
+        embeddings = position * theta  
 
         # (max_len, output_dim//2, 2)
         embeddings = torch.stack([torch.sin(embeddings), torch.cos(embeddings)], dim=-1)
 
         # (bs, head, max_len, output_dim//2, 2)
-        embeddings = embeddings.repeat((batch_size, nums_head, *([1] * len(embeddings.shape))))  # 在bs维度重复，其他维度都是1不重复
+        embeddings = embeddings.repeat((batch_size, nums_head, *([1] * len(embeddings.shape))))  
 
         # (bs, head, max_len, output_dim)
-        # reshape后就是：偶数sin, 奇数cos了
         embeddings = torch.reshape(embeddings, (batch_size, nums_head, max_len, output_dim))
         embeddings = embeddings.to(device)
 
@@ -116,14 +115,13 @@ class SelfAttention(nn.Module):
 
         # q,k: (bs, head, max_len, output_dim)
         q2 = torch.stack([-q[..., 1::2], q[..., ::2]], dim=-1)
-        q2 = q2.reshape(q.shape)  # reshape后就是正负交替了
+        q2 = q2.reshape(q.shape)  
 
-        # 更新qw, *对应位置相乘
         q = q * cos_pos + q2 * sin_pos
 
         k2 = torch.stack([-k[..., 1::2], k[..., ::2]], dim=-1)
         k2 = k2.reshape(k.shape)
-        # 更新kw, *对应位置相乘
+ 
         k = k * cos_pos + k2 * sin_pos
 
         return q.squeeze(1), k.squeeze(1)
@@ -171,3 +169,4 @@ if __name__ == "__main__":
     x2 = torch.randn(1, 512, 32, 32)
     x3 = torch.randn(1, 1024, 16, 16)
     y = net(x1, x2, x3)
+
