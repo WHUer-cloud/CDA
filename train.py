@@ -23,20 +23,6 @@ def train(obj_name, args):
     encoder = Encoder().to(device).eval()
     dec = GCMAndDecoder().to(device)
   
-    # ----- 参数量 & FLOPs -----
-    # 1. 教师
-    # teacher_params = sum(p.numel() for p in encoder.parameters())
-
-    # # # 2. 学生（全部）
-    # d1 = torch.randn(1, 256, 64, 64).to(device)
-    # d2 = torch.randn(1, 512, 32, 32).to(device)
-    # d3 = torch.randn(1, 1024, 16, 16).to(device)
-    # flops, params = profile(dec, inputs=(d1, d2, d3), verbose=False)
-
-    # print("Teacher params :", clever_format([teacher_params]))
-    # print("Student params :", clever_format([params]))
-    # print("Student FLOPs  :", clever_format([flops]))
-    # exit()
     # ----- 数据 -----
     ds = TrainDataset(root_dir=args.data_path, obj_name=obj_name, resize_shape=args.img_size)
     dl = DataLoader(ds, batch_size=args.bs, shuffle=False, drop_last=True, num_workers=8, pin_memory=True)
@@ -72,7 +58,7 @@ def train(obj_name, args):
             img_roc, pix_roc = test(obj_name, ck_path, args.data_path, args.img_size)
             writer.add_scalar("auroc_img", img_roc, epoch)
             writer.add_scalar("auroc_pix", pix_roc, epoch)
-            # 自动删除无提升的 checkpoint
+
             if img_roc <= best_img and pix_roc <= best_pix:
                 os.remove(ck_path)
             if img_roc > best_img:
@@ -84,7 +70,6 @@ def train(obj_name, args):
     return run_name, best_img, best_pix
 
 def test(obj_name, ckp_path, data_root, img_size):
-    # 保持与 test.py 一致，避免循环 import
     from test import test as _test
     return _test(obj_name, ckp_path, data_root, img_size)
 
@@ -100,13 +85,11 @@ if __name__ == "__main__":
     
     # 逐类别训练
     for obj in OBJ_NAMES:
-        # 训练当前类别
         run_name, best_img, best_pix = train(obj, args)
         
-        # 实时打印结果（严格按你要求的格式）
         result_line = f"{run_name} || auroc_img: {best_img:.3f} || auroc_pix: {best_pix:.3f}"
-        print(result_line)  # 控制台立即输出
-        
-        # 实时追加到文件（无需等待所有类别完成）
+        print(result_line)  
+
         with open(summary_path, "a") as f:
+
             f.write(result_line + "\n")
