@@ -6,7 +6,7 @@ from torchvision.models import wide_resnet50_2, Wide_ResNet50_2_Weights
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ---------- Mamba ----------
+# ---------- GSU ----------
 class RMSNorm(nn.Module):
     def __init__(self, d, eps=1e-5):
         super().__init__()
@@ -180,4 +180,5 @@ class GCMAndDecoder(nn.Module):
         l2n = self.c22(F.interpolate(l2n, size=32, mode='bilinear', align_corners=True))
         l3m = self.c31(F.interpolate(l3m, size=16, mode='bilinear', align_corners=True))
         l3n = self.c32(F.interpolate(l3n, size=16, mode='bilinear', align_corners=True))
+
         return s1, s2, s3, l1m, l1n, l2m, l2n, l3m, l3n
