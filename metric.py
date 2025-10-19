@@ -29,7 +29,7 @@ def anomaly_score(e_list, d_list, img_size=256):
     ac2 = torch.nn.functional.interpolate(ac2.unsqueeze(1), img_size, mode='bilinear', align_corners=True)
     ac3 = torch.nn.functional.interpolate(ac3.unsqueeze(1), img_size, mode='bilinear', align_corners=True)
     # 加权
-    score = a1 + a2 + a3 + 0,2* (0.4 * ac1 + 0.2 * ac2 + 0.4 * ac3)
+    score = a1 + a2 + a3 + 0.2* (0.4 * ac1 + 0.2 * ac2 + 0.4 * ac3)
     score = score.squeeze(1).cpu().numpy()
     # 高斯平滑
     for i in range(score.shape[0]):
